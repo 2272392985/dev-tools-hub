@@ -36,8 +36,8 @@ export async function POST(req: Request) {
     }
 
     const genAI = new GoogleGenerativeAI(key);
-    // Use selected model or default to gemini-1.5-flash
-    const model = genAI.getGenerativeModel({ model: modelName || "gemini-1.5-flash" });
+    // Use selected model or default to gemini-2.5-flash
+    const model = genAI.getGenerativeModel({ model: modelName || "gemini-2.5-flash" });
 
     const prompt = `
 You are an expert developer. Please add detailed comments to the following ${language || "code"} snippet.

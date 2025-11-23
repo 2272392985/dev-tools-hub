@@ -23,9 +23,9 @@ const LANGUAGES = [
 ];
 
 const MODELS = [
-  { value: "gemini-1.5-flash", label: "Gemini 1.5 Flash (快速)" },
-  { value: "gemini-1.5-pro", label: "Gemini 1.5 Pro (强力)" },
-  { value: "gemini-pro", label: "Gemini 1.0 Pro" },
+  { value: "gemini-2.5-flash", label: "Gemini 2.5 Flash (快速)" },
+  { value: "gemini-2.5-pro", label: "Gemini 2.5 Pro (强力)" },
+  { value: "gemini-3-pro-preview", label: "Gemini 3 Pro Preview (最新)" },
 ];
 
 const DEFAULT_API_KEY = "";
@@ -34,7 +34,7 @@ export default function AiCommenterTool() {
   const [code, setCode] = useState("");
   const [result, setResult] = useState("");
   const [language, setLanguage] = useState("javascript");
-  const [model, setModel] = useState("gemini-1.5-flash");
+  const [model, setModel] = useState("gemini-2.5-flash");
   const [apiKey, setApiKey] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -213,7 +213,7 @@ export default function AiCommenterTool() {
                 💡 说明
               </h3>
               <ul className="text-sm text-violet-700 dark:text-violet-400 space-y-1 list-disc list-inside">
-                <li>使用 Google Gemini 1.5 Flash 模型</li>
+                <li>支持最新的 Gemini 2.5/3.0 模型</li>
                 <li>自动添加 JSDoc/DocString 文档注释</li>
                 <li>为复杂逻辑添加行内解释</li>
                 <li>保持原有代码逻辑不变</li>
