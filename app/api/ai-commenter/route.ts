@@ -14,18 +14,18 @@ export async function POST(req: Request) {
     }
 
     // Use provided key, or fetch from DB, or env var
-    let key = apiKey;
+    let key = apiKey ? apiKey.trim() : "";
 
     if (!key) {
       const configs = await getApiConfigs();
       const geminiConfig = configs.find(c => c.service === 'gemini' && c.isActive);
-      if (geminiConfig) {
-        key = geminiConfig.apiKey;
+      if (geminiConfig && geminiConfig.apiKey) {
+        key = geminiConfig.apiKey.trim();
       }
     }
 
     if (!key) {
-      key = process.env.GEMINI_API_KEY;
+      key = process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim() : "";
     }
 
     if (!key) {
@@ -34,6 +34,8 @@ export async function POST(req: Request) {
         { status: 401 }
       );
     }
+
+    console.log(`Using API Key: ${key.substring(0, 8)}... (Length: ${key.length})`);
 
     const genAI = new GoogleGenerativeAI(key);
     // Use selected model or default to gemini-2.5-flash
