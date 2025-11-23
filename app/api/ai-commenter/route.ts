@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
+import { getApiConfigs } from "@/lib/data";
 
 export async function POST(req: Request) {
   try {
@@ -12,12 +13,24 @@ export async function POST(req: Request) {
       );
     }
 
-    // Use provided key, env var, or hardcoded default
-    const key = apiKey || process.env.GEMINI_API_KEY || "AIzaSyDl0YiPR2qE7EfUXXa-Vgzst7Mt4ht-N30";
+    // Use provided key, or fetch from DB, or env var
+    let key = apiKey;
+
+    if (!key) {
+      const configs = await getApiConfigs();
+      const geminiConfig = configs.find(c => c.service === 'gemini' && c.isActive);
+      if (geminiConfig) {
+        key = geminiConfig.apiKey;
+      }
+    }
+
+    if (!key) {
+      key = process.env.GEMINI_API_KEY;
+    }
 
     if (!key) {
       return NextResponse.json(
-        { error: "API Key is required" },
+        { error: "API Key is required. Please configure it in Admin Panel." },
         { status: 401 }
       );
     }

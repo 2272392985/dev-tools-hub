@@ -28,7 +28,7 @@ const MODELS = [
   { value: "gemini-pro", label: "Gemini 1.0 Pro" },
 ];
 
-const DEFAULT_API_KEY = "AIzaSyDl0YiPR2qE7EfUXXa-Vgzst7Mt4ht-N30";
+const DEFAULT_API_KEY = "";
 
 export default function AiCommenterTool() {
   const [code, setCode] = useState("");
