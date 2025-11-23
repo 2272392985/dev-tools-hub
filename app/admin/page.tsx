@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { Eye, EyeOff, Plus, Trash2, Save, Link as LinkIcon, Upload, ChevronLeft, ChevronRight, LayoutGrid } from "lucide-react";
+import { Eye, EyeOff, Plus, Trash2, Save, Link as LinkIcon, Upload, ChevronLeft, ChevronRight, LayoutGrid, Key } from "lucide-react";
 import { iconMap, getIcon } from "@/lib/icons";
 
 interface Tool {
@@ -25,16 +25,24 @@ interface LinkItem {
   category?: string;
 }
 
+interface ApiConfig {
+  id: string;
+  service: string;
+  apiKey: string;
+  isActive: boolean;
+}
+
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [tools, setTools] = useState<Tool[]>([]);
   const [links, setLinks] = useState<LinkItem[]>([]);
+  const [apiConfigs, setApiConfigs] = useState<ApiConfig[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const fileInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 
   // Pagination & Tabs
-  const [activeTab, setActiveTab] = useState<'tools' | 'links'>('tools');
+  const [activeTab, setActiveTab] = useState<'tools' | 'links' | 'api'>('tools');
   const [toolsPage, setToolsPage] = useState(1);
   const [linksPage, setLinksPage] = useState(1);
   const ITEMS_PER_PAGE = 9;
@@ -64,16 +72,19 @@ export default function AdminPage() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [toolsRes, linksRes] = await Promise.all([
+      const [toolsRes, linksRes, apiRes] = await Promise.all([
         fetch("/api/tools"),
-        fetch("/api/links")
+        fetch("/api/links"),
+        fetch("/api/api-configs")
       ]);
       
       const fetchedTools = await toolsRes.json();
       const fetchedLinks = await linksRes.json();
+      const fetchedApiConfigs = await apiRes.json();
       
       setTools(fetchedTools);
       setLinks(fetchedLinks);
+      setApiConfigs(fetchedApiConfigs);
     } catch (e) {
       console.error(e);
       toast.error("获取数据失败");
@@ -175,6 +186,38 @@ export default function AdminPage() {
     }
   };
 
+  const addApiConfig = () => {
+    const newConfig: ApiConfig = {
+      id: Date.now().toString(),
+      service: "gemini",
+      apiKey: "",
+      isActive: true
+    };
+    setApiConfigs([...apiConfigs, newConfig]);
+  };
+
+  const updateApiConfig = (id: string, field: keyof ApiConfig, value: string | boolean) => {
+    setApiConfigs(apiConfigs.map(c => c.id === id ? { ...c, [field]: value } : c));
+  };
+
+  const deleteApiConfig = (id: string) => {
+    setApiConfigs(apiConfigs.filter(c => c.id !== id));
+  };
+
+  const saveApiConfigsData = async () => {
+    try {
+      await fetch("/api/api-configs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(apiConfigs),
+      });
+      toast.success("API 配置已保存");
+    } catch (e) {
+      console.error(e);
+      toast.error("保存失败");
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("admin_auth");
     setIsAuthenticated(false);
@@ -248,6 +291,19 @@ export default function AdminPage() {
           >
             外部链接管理
             {activeTab === 'links' && (
+              <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 dark:bg-blue-400" />
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab('api')}
+            className={`pb-2 px-4 font-medium transition-colors relative ${
+              activeTab === 'api' 
+                ? 'text-blue-600 dark:text-blue-400' 
+                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+            }`}
+          >
+            API 管理
+            {activeTab === 'api' && (
               <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 dark:bg-blue-400" />
             )}
           </button>
@@ -462,6 +518,80 @@ export default function AdminPage() {
               <div className="mt-6 flex justify-end">
                 <button onClick={saveLinksData} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
                   <Save className="w-4 h-4" /> 保存链接配置
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* API Management */}
+        {activeTab === 'api' && (
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold dark:text-white flex items-center gap-2">
+                <Key className="w-5 h-5" />
+                API 密钥管理
+              </h2>
+              <button onClick={addApiConfig} className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                <Plus className="w-4 h-4" /> 添加 API
+              </button>
+            </div>
+            
+            <div className="space-y-4 mb-6">
+              {apiConfigs.map((config) => (
+                <div key={config.id} className="flex gap-4 items-start p-4 border rounded-lg bg-gray-50 dark:bg-gray-900/50">
+                  <div className="grid gap-4 flex-1 md:grid-cols-3">
+                    <div>
+                      <label className="text-xs text-gray-500 mb-1 block">服务商</label>
+                      <select
+                        value={config.service}
+                        onChange={(e) => updateApiConfig(config.id, "service", e.target.value)}
+                        className="w-full p-2 text-sm border rounded dark:bg-gray-800 dark:border-gray-700"
+                      >
+                        <option value="gemini">Google Gemini</option>
+                        <option value="openai">OpenAI</option>
+                        <option value="anthropic">Anthropic Claude</option>
+                        <option value="other">其他</option>
+                      </select>
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="text-xs text-gray-500 mb-1 block">API Key</label>
+                      <input
+                        type="password"
+                        value={config.apiKey}
+                        onChange={(e) => updateApiConfig(config.id, "apiKey", e.target.value)}
+                        className="w-full p-2 text-sm border rounded dark:bg-gray-800 dark:border-gray-700 font-mono"
+                        placeholder="sk-..."
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2 mt-6">
+                    <button
+                      onClick={() => updateApiConfig(config.id, "isActive", !config.isActive)}
+                      className={`p-2 rounded ${config.isActive ? 'text-green-600 bg-green-50' : 'text-gray-400 bg-gray-200'}`}
+                      title={config.isActive ? "已启用" : "已禁用"}
+                    >
+                      {config.isActive ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                    </button>
+                    <button
+                      onClick={() => deleteApiConfig(config.id)}
+                      className="p-2 text-red-500 hover:bg-red-50 rounded"
+                      title="删除"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {apiConfigs.length === 0 && (
+                <div className="text-center text-gray-500 py-8">暂无 API 配置</div>
+              )}
+            </div>
+            
+            {apiConfigs.length > 0 && (
+              <div className="mt-6 flex justify-end">
+                <button onClick={saveApiConfigsData} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                  <Save className="w-4 h-4" /> 保存 API 配置
                 </button>
               </div>
             )}

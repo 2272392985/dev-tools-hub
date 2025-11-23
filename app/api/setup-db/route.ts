@@ -29,6 +29,16 @@ export async function GET() {
       );
     `;
 
+    // Create API Configs table
+    await sql`
+      CREATE TABLE IF NOT EXISTS api_configs (
+        id VARCHAR(255) PRIMARY KEY,
+        service VARCHAR(50) NOT NULL,
+        api_key TEXT NOT NULL,
+        is_active BOOLEAN DEFAULT true
+      );
+    `;
+
     // Check if tools table is empty
     const { rows: toolsRows } = await sql`SELECT COUNT(*) FROM tools`;
     if (toolsRows[0].count === '0') {

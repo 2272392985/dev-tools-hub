@@ -20,6 +20,13 @@ export interface LinkItem {
   category?: string;
 }
 
+export interface ApiConfig {
+  id: string;
+  service: string;
+  apiKey: string;
+  isActive: boolean;
+}
+
 export async function getTools(): Promise<Tool[]> {
   try {
     const { rows } = await sql`SELECT * FROM tools`;
@@ -85,6 +92,36 @@ export async function saveLinks(links: LinkItem[]) {
     }
   } catch (error) {
     console.error('Failed to save links:', error);
+    throw error;
+  }
+}
+
+export async function getApiConfigs(): Promise<ApiConfig[]> {
+  try {
+    const { rows } = await sql`SELECT * FROM api_configs`;
+    return rows.map(row => ({
+      id: row.id,
+      service: row.service,
+      apiKey: row.api_key,
+      isActive: row.is_active
+    }));
+  } catch (error) {
+    console.error('Database Error:', error);
+    return [];
+  }
+}
+
+export async function saveApiConfigs(configs: ApiConfig[]) {
+  try {
+    await sql`DELETE FROM api_configs`;
+    for (const config of configs) {
+      await sql`
+        INSERT INTO api_configs (id, service, api_key, is_active)
+        VALUES (${config.id}, ${config.service}, ${config.apiKey}, ${config.isActive})
+      `;
+    }
+  } catch (error) {
+    console.error('Failed to save api configs:', error);
     throw error;
   }
 }
