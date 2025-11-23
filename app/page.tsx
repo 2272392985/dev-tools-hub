@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { LayoutGrid, Network, Cpu, Palette, Bot, Flame, Link as LinkIcon, Code, Server } from "lucide-react";
+import { LayoutGrid, Network, Cpu, Palette, Bot, Flame, Link as LinkIcon, Code, Server, Search } from "lucide-react";
 import { getIcon } from "@/lib/icons";
 
 type Tool = {
@@ -35,6 +35,7 @@ const CATEGORIES = [
 
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [tools, setTools] = useState<Tool[]>([]);
   const [links, setLinks] = useState<LinkItem[]>([]);
   const [popularTools, setPopularTools] = useState<Tool[]>([]);
@@ -94,13 +95,25 @@ export default function Home() {
   };
 
   const filteredTools = tools.filter(
-    (tool) => tool.isVisible && (activeCategory === "all" || tool.category === activeCategory)
+    (tool) => 
+      tool.isVisible && 
+      (activeCategory === "all" || tool.category === activeCategory) &&
+      (tool.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+       tool.description.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
-  const aiLinks = links.filter(l => l.category === 'ai');
-  const devtoolsLinks = links.filter(l => l.category === 'devtools');
-  const backendLinks = links.filter(l => l.category === 'backend');
-  const generalLinks = links.filter(l => !l.category || l.category === 'general');
+  const filterLinks = (category?: string) => {
+    return links.filter(l => 
+      (!category ? (!l.category || l.category === 'general') : l.category === category) &&
+      (l.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+       (l.description && l.description.toLowerCase().includes(searchQuery.toLowerCase())))
+    );
+  };
+
+  const aiLinks = filterLinks('ai');
+  const devtoolsLinks = filterLinks('devtools');
+  const backendLinks = filterLinks('backend');
+  const generalLinks = filterLinks();
 
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center">加载中...</div>;
@@ -125,6 +138,30 @@ export default function Home() {
                 )}
               </p>
             </div>
+            
+            {/* Search Bar */}
+            <div className="relative w-full max-w-xs hidden md:block">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="搜索工具..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white text-sm"
+              />
+            </div>
+          </div>
+
+          {/* Mobile Search Bar */}
+          <div className="relative w-full mb-4 md:hidden">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="搜索工具..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white text-sm"
+            />
           </div>
 
           {/* Navigation Bar */}

@@ -158,5 +158,65 @@
     "color": "bg-pink-600",
     "category": "image",
     "isVisible": true
+  },
+  {
+    "id": "json",
+    "title": "JSON 工具箱",
+    "description": "格式化、压缩、转 TypeScript 类型定义",
+    "icon": "Braces",
+    "href": "/tools/json",
+    "color": "bg-yellow-500",
+    "category": "dev",
+    "isVisible": true
+  },
+  {
+    "id": "regex",
+    "title": "正则助手",
+    "description": "正则表达式测试与 AI 生成",
+    "icon": "Regex",
+    "href": "/tools/regex",
+    "color": "bg-pink-500",
+    "category": "dev",
+    "isVisible": true
+  },
+  {
+    "id": "jwt",
+    "title": "JWT 解码",
+    "description": "解析 JWT Token Header 和 Payload",
+    "icon": "ShieldCheck",
+    "href": "/tools/jwt",
+    "color": "bg-blue-500",
+    "category": "dev",
+    "isVisible": true
+  },
+  {
+    "id": "diff",
+    "title": "文本对比",
+    "description": "比较两段文本的差异，高亮显示不同之处",
+    "icon": "FileDiff",
+    "href": "/tools/diff",
+    "color": "bg-orange-500",
+    "category": "dev",
+    "isVisible": true
+  },
+  {
+    "id": "uuid",
+    "title": "UUID 生成",
+    "description": "批量生成 UUID v4，支持自定义格式",
+    "icon": "Fingerprint",
+    "href": "/tools/uuid",
+    "color": "bg-purple-500",
+    "category": "dev",
+    "isVisible": true
+  },
+  {
+    "id": "ai-sql",
+    "title": "AI SQL 生成",
+    "description": "使用自然语言描述生成 SQL 查询语句",
+    "icon": "Sparkles",
+    "href": "/tools/ai-sql",
+    "color": "bg-indigo-500",
+    "category": "ai",
+    "isVisible": true
   }
 ]
